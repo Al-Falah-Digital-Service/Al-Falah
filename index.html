@@ -1,0 +1,186 @@
+<!DOCTYPE html><html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CapCut Premium - আনলক করুন প্রিমিয়াম ফিচার</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(20px);
+      border-radius: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+    }
+  </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      query,
+      where,
+      getDocs,
+      doc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";const firebaseConfig = {
+  apiKey: "AIzaSyAgIhuqKrSxXowZbfR9gJvkp7YMbVmKlOE",
+  authDomain: "al-falah-35c13.firebaseapp.com",
+  projectId: "al-falah-35c13",
+  storageBucket: "al-falah-35c13.firebasestorage.app",
+  messagingSenderId: "262500463157",
+  appId: "1:262500463157:web:668bbb79facf3ccb1a377c"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const downloadLink = "https://drive.google.com/uc?export=download&id=1-fzz0Yv8z-AduU9yzt8oaSSwaGmO6Kep";
+const telegramLink = "https://t.me/+d_5XC2ghbyY5NTI1";
+
+async function isAutoApproveEnabled() {
+  const settingsDoc = await getDoc(doc(db, "settings", "admin"));
+  return settingsDoc.exists() && settingsDoc.data().autoApprove === true;
+}
+
+async function handleSubmit(event) {
+  event.preventDefault();
+  const phone = document.getElementById("phone").value.trim();
+  const name = document.getElementById("name").value.trim();
+  const trxId = document.getElementById("trxId").value.trim();
+
+  if (!/^\d{11}$/.test(phone)) {
+    alert("সঠিক ১১ ডিজিটের মোবাইল নাম্বার দিন।");
+    return;
+  }
+
+  document.getElementById("submitBtn").disabled = true;
+  const autoApprove = await isAutoApproveEnabled();
+
+  await addDoc(collection(db, "orders"), {
+    name,
+    phone,
+    trxId,
+    approved: autoApprove,
+    createdAt: new Date(),
+  });
+
+  document.getElementById("form-section").classList.add("hidden");
+  const status = document.getElementById("status");
+  status.classList.remove("hidden");
+
+  const successHTML = `✅ অ্যাপ্রুভ সম্পন্ন হয়েছে! <a href="${downloadLink}" target="_blank" class="mt-4 inline-block bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-xl font-semibold shadow-xl hover:shadow-2xl transition">এখনই ডাউনলোড করুন</a><br/><a href="${telegramLink}" target="_blank" class="mt-4 inline-block bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-xl font-medium shadow-lg transition">📢 আমাদের টেলিগ্রাম চ্যানেলে যুক্ত হন</a>`;
+
+  if (autoApprove) {
+    status.innerHTML = successHTML;
+    return;
+  }
+
+  status.innerHTML = `⏳ যাচাই চলছে... <span id="countdown">1:00</span>`;
+  let timeLeft = 60;
+  const interval = setInterval(async () => {
+    timeLeft--;
+    const min = Math.floor(timeLeft / 60);
+    const sec = (timeLeft % 60).toString().padStart(2, "0");
+    document.getElementById("countdown").textContent = `${min}:${sec}`;
+
+    const q = query(collection(db, "orders"), where("phone", "==", phone), where("approved", "==", true));
+    const snap = await getDocs(q);
+
+    if (!snap.empty) {
+      clearInterval(interval);
+      status.innerHTML = successHTML;
+    } else if (timeLeft <= 0) {
+      clearInterval(interval);
+      status.innerHTML = `❌ এখনো অ্যাপ্রুভ হয়নি। <button onclick="location.reload()" class="mt-4 inline-block bg-rose-500 hover:bg-rose-600 text-white px-5 py-2 rounded-xl font-semibold shadow-md transition">আবার চেষ্টা করুন</button>`;
+    }
+  }, 1000);
+}
+
+window.onload = () => {
+  AOS.init();
+  document.getElementById("orderForm").addEventListener("submit", handleSubmit);
+};
+
+  </script>
+</head>
+<body class="text-gray-800 scroll-smooth">
+  <header class="p-4 bg-white shadow fixed w-full top-0 left-0 z-50">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <h1 class="text-xl font-bold text-emerald-600">CapCut Premium</h1>
+      <a href="#form-section" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-full">Order Now</a>
+    </div>
+  </header>  <main class="pt-24">
+    <section class="min-h-[80vh] flex items-center justify-center px-6 text-center bg-gradient-to-br from-emerald-50 to-white" data-aos="fade-down">
+      <div class="max-w-3xl">
+        <h1 class="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">CapCut Premium আনলক করুন</h1>
+        <p class="mt-6 text-lg md:text-xl text-gray-700 font-medium">মাত্র ৪৯ টাকা পেমেন্ট করে CapCut এর সব প্রিমিয়াম ফিচার আনলক করুন — কোনো Watermark ছাড়াই ফুল HD ভিডিও এক্সপোর্ট, অসংখ্য প্রিমিয়াম ইফেক্ট, ফন্ট, স্টিকার এবং আরও অনেক কিছু।</p>
+        <a href="#features" class="mt-8 inline-block bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-xl text-lg font-semibold shadow-lg transition">সব ফিচার দেখুন</a>
+      </div>
+    </section><section id="features" class="py-20 px-6 md:px-16 bg-white text-center" data-aos="fade-up">
+  <h2 class="text-3xl md:text-4xl font-bold text-emerald-600 mb-10">CapCut Premium – সব প্রিমিয়াম ফিচার একসাথে</h2>
+  <p class="text-teal-700 font-semibold mb-6 text-lg">🔥 এখনই আনলক করুন লাইফটাইম প্রিমিয়াম ভার্সন একদম ফ্রী — মাত্র একবারের অর্ডারে!</p>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div class="glass p-6 text-left">
+      <h3 class="text-xl font-semibold text-emerald-700">✅ Watermark মুক্ত ভিডিও</h3>
+      <p class="mt-2 text-gray-600">Watermark ছাড়াই HD ভিডিও তৈরি করুন একদম প্রফেশনাল স্টাইলে।</p>
+    </div>
+    <div class="glass p-6 text-left">
+      <h3 class="text-xl font-semibold text-emerald-700">🎬 Full HD 1080p Export</h3>
+      <p class="mt-2 text-gray-600">কোনো সীমাবদ্ধতা ছাড়াই ফুল এইচডি রেজুলুশনে ভিডিও এক্সপোর্ট করুন।</p>
+    </div>
+    <div class="glass p-6 text-left">
+      <h3 class="text-xl font-semibold text-emerald-700">💥 Premium Effects & Transitions</h3>
+      <p class="mt-2 text-gray-600">সকল প্রিমিয়াম ইফেক্ট এবং ট্রানজিশন এক ক্লিকে আনলক।</p>
+    </div>
+    <div class="glass p-6 text-left">
+      <h3 class="text-xl font-semibold text-emerald-700">🔤 Stylish Fonts & Stickers</h3>
+      <p class="mt-2 text-gray-600">বিভিন্ন প্রিমিয়াম ফন্ট ও স্টিকারসহ আপনার ভিডিওকে করে তুলুন আকর্ষণীয়।</p>
+    </div>
+    <div class="glass p-6 text-left">
+      <h3 class="text-xl font-semibold text-emerald-700">⚡ One-Click Unlock</h3>
+      <p class="mt-2 text-gray-600">মাত্র ১ মিনিটে অ্যাক্টিভেশন নিশ্চিত।</p>
+    </div>
+    <div class="glass p-6 text-left">
+      <h3 class="text-xl font-semibold text-emerald-700">🔒 Original CapCut App</h3>
+      <p class="mt-2 text-gray-600">কোনো আলাদা অ্যাপ নয়, মূল CapCut অ্যাপেই একটিভ হবে।</p>
+    </div>
+  </div>
+</section>
+
+<section id="form-section" class="py-16 px-6 md:px-20 bg-gradient-to-b from-emerald-50 to-white" data-aos="fade-up">
+  <div class="max-w-xl mx-auto mb-6 text-center text-rose-600 font-medium text-base md:text-lg">
+    📲 bKash-এ <strong>০১৬০১০৩৩৩২৩</strong> নাম্বারে <strong>৪৯ টাকা</strong> সেন্ড মানি করে নিচের ফর্মটি পূরণ করুন। ✅
+  </div>
+  <form id="orderForm" class="glass p-8 rounded-2xl max-w-xl mx-auto space-y-4 shadow-xl bg-white">
+    <h3 class="text-2xl font-bold mb-4 text-center text-emerald-600">CapCut Premium অর্ডার ফর্ম</h3>
+    <input required id="name" type="text" placeholder="আপনার নাম" class="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-500 focus:ring-2 focus:ring-emerald-500" />
+    <input required id="phone" type="tel" placeholder="১১ ডিজিটের মোবাইল নাম্বার" class="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-500 focus:ring-2 focus:ring-emerald-500" />
+    <input required id="trxId" type="text" placeholder="bKash ট্রানজেকশন আইডি" class="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-500 focus:ring-2 focus:ring-emerald-500" />
+    <button id="submitBtn" type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold py-3 rounded-xl hover:shadow-xl transition">সাবমিট করুন</button>
+  </form>
+</section>
+
+<section id="status" class="text-center text-lg mt-6 hidden px-4 text-gray-700"></section>
+
+  </main>  <footer class="mt-16 text-center text-sm py-6 bg-white text-gray-500">
+    © <span class="text-emerald-500 font-semibold">Al Falah - Digital Service</span> | Dhaka,Bangladesh
+  </footer>  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('h1, h2, h3').forEach(el => el.classList.add('text-emerald-700'));
+      document.querySelectorAll('strong').forEach(el => el.classList.add('text-rose-600'));
+      document.querySelectorAll('p').forEach(p => {
+        if (p.innerText.includes('টাকা') || p.innerText.includes('Premium')) {
+          p.classList.add('text-teal-700');
+        }
+      });
+    });
+  </script></body>
+</html>
